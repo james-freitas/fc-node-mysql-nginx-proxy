@@ -1,4 +1,4 @@
-# People application
+# Sample Node application
 Node application proxy reversed by a Nginx server
 
 ## ✔️ Requirements

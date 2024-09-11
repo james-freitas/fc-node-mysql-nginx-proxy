@@ -8,7 +8,7 @@ let reo ='<html><head><title>Full Cycle Rocks!</title></head><body><h1>Full Cycl
 function setResHtml(sql, cb){
 
   const config = {
-    host: 'db',
+    host: 'database',
     user: 'root',
     password: 'root',
     database: 'nodedb'

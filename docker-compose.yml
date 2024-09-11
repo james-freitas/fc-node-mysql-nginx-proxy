@@ -3,24 +3,21 @@ version: '3'
 services:
 
   nginx:
-    build:
-      context: nginx
-      dockerfile: Dockerfile.prod
-    image: jamesfrj/nginx-as-node-reverse-proxy:prod
+    image: nginx:1.27.1
     container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - node-network
     ports:
-      - "8080:8080"
+      - "8080:80"
     depends_on:
       - app  
 
   app:
     build:
       context: node
-      dockerfile: Dockerfile
     container_name: app
-    entrypoint: bash -c "dockerize -wait tcp://db:3306 -timeout 20s && npm install && node index.js"
     networks:
       - node-network
     volumes:
@@ -29,22 +26,27 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      database:
+        condition: service_healthy
 
-  db:
+  database:
     image: mysql:5.7
-    command: --innodb-use-native-aio=0 --init-file /data/application/init.sql
-    container_name: db
+    container_name: database
     restart: always
     tty: true
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - ./mysql/init.sql:/data/application/init.sql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
     networks: 
       - node-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
 
 networks:
   node-network:

@@ -16,14 +16,14 @@ services:
 
   app:
     build:
-      context: node
+      context: app
     container_name: app
     networks:
       - node-network
     volumes:
-      - ./node:/usr/src/app
+      - ./app:/usr/src/app
     tty: true
-    entrypoint: sh -c "npm install && node index.js"
+    entrypoint: sh -c "npm install && npm run dev"
     depends_on:
       database:
         condition: service_healthy
